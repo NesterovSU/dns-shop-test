@@ -1,48 +1,45 @@
-import managers.DriverManager;
 import managers.PagesManager;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.params.ParameterizedTest.ARGUMENTS_WITH_NAMES_PLACEHOLDER;
 
 /**
  * @author Sergey Nesterov
  */
-public class AddAndDeleteProductBasketTest {
+public class AddAndDeleteProductBasketTest extends BeforeTests {
 
-    @BeforeAll
-    static void beforeAll() {
-        DriverManager.getWebDriver().get("https://www.dns-shop.ru");
+    //
+    static Stream<Arguments> userData() {
+        return Stream.of(
+                Arguments.of("телевизор", "H32F7100C", "Detroit", "Игра Detroit")
+        );
     }
 
-    @AfterAll
-    public static void afterAll() {
-        try {
-            Thread.sleep(4000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        DriverManager.quit();
-    }
+    @ParameterizedTest(name = ARGUMENTS_WITH_NAMES_PLACEHOLDER)
+    @MethodSource("userData")
+    void test(String firstSearch, String firstName, String secondSearch, String secondName) {
+//        String firstSearch = properties.get("first.search"),
+//                firstName = properties.get("first.name"),
+//                secondSearch = properties.get("second.search"),
+//                secondName = properties.get("second.name");
 
-    @Test
-    void test() {
         //Цена 1го товара
         int priceFirstProduct = PagesManager.getHomePage()
-                .typeInSearchFormAndRequest("телевизор")
-                .clickOnProductContainedName("LED DEXP H32F7100C")
+                .typeInSearchFormAndRequest(firstSearch)
+                .clickOnProductContainedName(firstName)
                 .getPrice();
-
-        System.out.println(priceFirstProduct);
 
         //Добавляем 1й товар в корзину   //Цена 2го товара
         int priceSecondProduct = PagesManager.getProductCardPage()
                 .clickBuy()
-                .typeInSearchFormAndRequest("Detroit")
-                .clickOnProductContainedName("Игра Detroit")
+                .typeInSearchFormAndRequest(secondSearch)
+                .clickOnProductContainedName(secondName)
                 .getPrice();
-
-        System.out.println(priceSecondProduct);
 
         //Добавляем 2й товар в корзину
         PagesManager.getProductCardPage()
@@ -58,13 +55,13 @@ public class AddAndDeleteProductBasketTest {
         Assertions.assertEquals(priceFirstProduct,
                 PagesManager.getProductCardPage()
                         .clickOnBasketIcon()
-                        .getProductPrice("H32F7100C"),
+                        .getProductPrice(firstName),
                 "Цена первого товара в козине неверна");
 
         //Проверяем цену 2го товара в корзине
         Assertions.assertEquals(priceSecondProduct,
                 PagesManager.getBasketPage()
-                        .getProductPrice("Игра Detroit"),
+                        .getProductPrice(secondName),
                 "Цена второго товара в козине неверна");
 
         //Проверяем итоговую цену в корзине
@@ -73,12 +70,12 @@ public class AddAndDeleteProductBasketTest {
                         .getBasketPrice(),
                 "Цена корзины неверна");
 
-        //Проверяем удаление товара
+        //Проверяем удаление второго товара
         Assertions.assertAll(
                 () -> Assertions.assertEquals(-1,
                         PagesManager.getBasketPage()
-                                .clickDelete("Detroit")
-                                .getProductPrice("Detroit"),
+                                .clickDelete(secondName)
+                                .getProductPrice(secondName),
                         "Товар не удалился из корзины"),
                 () -> Assertions.assertEquals(priceFirstProduct,
                         PagesManager.getBasketPage()
@@ -88,8 +85,8 @@ public class AddAndDeleteProductBasketTest {
         //Проверяем добавление первого товара
         Assertions.assertEquals(priceFirstProduct * 3,
                 PagesManager.getBasketPage()
-                        .clickPlus("H32F7100C")
-                        .clickPlus("H32F7100C")
+                        .clickPlus(firstName)
+                        .clickPlus(firstName)
                         .getBasketPrice(),
                 "Цена корзины не равна стоимости 3х товаров");
 
@@ -98,7 +95,7 @@ public class AddAndDeleteProductBasketTest {
                 () -> Assertions.assertEquals((priceFirstProduct * 3) + priceSecondProduct,
                         PagesManager.getBasketPage()
                                 .restoreProduct()
-                                .clickCheckBox("Detroit")
+                                .clickCheckBox(secondName)
                                 .getBasketPrice(),
                         "Цена корзины не увеличилась на цену возвращенного товара"),
                 () -> Assertions.assertEquals(priceSecondProduct,
