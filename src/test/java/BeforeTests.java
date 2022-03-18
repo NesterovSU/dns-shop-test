@@ -1,6 +1,8 @@
 import managers.DriverManager;
+import managers.PagesManager;
 import managers.PropertiesManager;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -11,12 +13,12 @@ public class BeforeTests {
     protected static PropertiesManager properties = PropertiesManager.getInstance();
 
     @BeforeEach
-    static void beforeEach() {
+    void beforeEach() {
         DriverManager.getWebDriver().get(properties.get("home.url"));
     }
 
-    @AfterAll
-    public static void afterAll() {
+    @AfterEach
+    void afterEach() {
         try {
             long sleepAfterTest = Long.parseLong(properties.get("sleep.after.test")) * 1000;
             Thread.sleep(sleepAfterTest);
@@ -24,5 +26,11 @@ public class BeforeTests {
             e.printStackTrace();
         }
         DriverManager.quit();
+        PagesManager.deleteInstance();
     }
+
+//    @BeforeAll
+//    static void afterAll(){
+//        DriverManager.quit();
+//    }
 }

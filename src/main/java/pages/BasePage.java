@@ -42,12 +42,13 @@ public class BasePage {
     public SearchResults typeInSearchFormAndRequest(String request) {
         search.sendKeys(request);
         search.sendKeys(Keys.ENTER);
-        return PagesManager.getSearchResults();
+        return PagesManager.getInstance().getSearchResults();
     }
 
     public BasketPage clickOnBasketIcon() {
         basketIcon.click();
-        return PagesManager.getBasketPage();
+        waitFor(basketIconCount);
+        return PagesManager.getInstance().getBasketPage();
     }
 
     public int getBasketIconPrice() {
@@ -64,8 +65,8 @@ public class BasePage {
         );
     }
 
-    public WebElement waitClick(WebElement webElement) {
-        return wait.until(ExpectedConditions.elementToBeClickable(webElement));
+    public WebElement waitClick(WebElement we) {
+        return wait.until(ExpectedConditions.elementToBeClickable(we));
     }
 
     public WebElement waitFor(WebElement we) {

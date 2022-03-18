@@ -21,16 +21,15 @@ public class SearchResults extends BasePage{
     private List<WebElement> productList;
 
     public ProductCardPage clickOnProductContainedName(String name){
-        new WebDriverWait(driver, 20)
-                .until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@class='title']")));
+        wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath("//*[@class='title']")));
         for (WebElement product : productList){
             if(product.getText().contains(name)){
                 product.click();
-                return PagesManager.getProductCardPage();
+                return PagesManager.getInstance().getProductCardPage();
             }
         }
         //Assertions
         System.err.println("Не найден продукт с названием: " + name);
-        return PagesManager.getProductCardPage();
+        return PagesManager.getInstance().getProductCardPage();
     }
 }

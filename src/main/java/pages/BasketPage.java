@@ -39,9 +39,6 @@ public class BasketPage extends BasePage {
     @FindBy(xpath = "//*[@class='total-amount__label']//*[@class='price__current']")
     private WebElement basketPrice;
 
-    private String hat = "//*[@class='cart-items__product']//*[contains(@class,'container')]//*[contains(text(), '%s')]//ancestor::div[@class='cart-items__product']//*[contains(@class,'base-ui-checkbox__icon')]";
-
-
 
     //methods
     public int getBasketCount() {
@@ -52,26 +49,32 @@ public class BasketPage extends BasePage {
         return Integer.parseInt(basketPrice.getText().replaceAll("\\D", ""));
     }
 
+    // -1  Если не найден элемент
     public int getProductPrice(String name) {
         for (WebElement p : productList) {
             if (p.findElement(productName).getText().contains(name)) {
                 return Integer.parseInt(p.findElement(price).getText().replaceAll("\\D", ""));
             }
         }
-        //Assertions
-//        System.err.println("Не найден продукт с названием содержащим: " + name);
         return -1;
     }
 
     public BasketPage restoreProduct() {
+        String countProductBefore = Integer.toString(getBasketIconCount());
         scrollUp();
         restoreProduct.click();
+        waitUntilBasketIconCountChange(countProductBefore);
         return this;
     }
 
     public BasketPage clickCheckBox(String name) {
-        waitClick(driver.findElement(By.xpath(String.format(hat, name))));
-        return clickButton(name, checkBox);
+        for (WebElement p : productList) {
+            if (p.findElement(productName).getText().contains(name)) {
+                waitClick(p.findElement(checkBox)).click();
+                return this;
+            }
+        }
+        return this;
     }
 
     public BasketPage clickDelete(String name) {
@@ -79,7 +82,6 @@ public class BasketPage extends BasePage {
     }
 
     public BasketPage clickPlus(String name) {
-
         return clickButton(name, plusButton);
     }
 
@@ -89,15 +91,15 @@ public class BasketPage extends BasePage {
 
     public BasketPage clickButton(String name, By button) {
         String countProductBefore = Integer.toString(getBasketIconCount());
+        scrollUp();
         for (WebElement p : productList) {
             if (p.findElement(productName).getText().contains(name)) {
-                scrollUp();
-                waitClick(waitFor(p.findElement(button))).click();
+                waitClick(p.findElement(button)).click();
                 waitUntilBasketIconCountChange(countProductBefore);
                 return this;
             }
         }
-        //Assertions
+//        Assertions
         System.err.println("Не найден продукт с названием содержащим: " + name);
         return this;
     }
