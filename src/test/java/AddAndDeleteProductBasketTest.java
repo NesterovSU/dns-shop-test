@@ -1,3 +1,4 @@
+import entities.Product;
 import managers.PagesManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,48 +13,48 @@ public class AddAndDeleteProductBasketTest extends BeforeTests {
     @CsvFileSource(resources = "/test-parameters.csv")
     void test(String firstSearch, String firstName, String secondSearch, String secondName) {
 
-        //Цена 1го товара
-        int priceFirstProduct = PagesManager.getInstance().getHomePage()
+
+        PagesManager.getInstance().getHomePage()
                 .typeInSearchFormAndRequest(firstSearch)
                 .clickOnProductContainedName(firstName)
-                .getPrice();
-
-        //Добавляем 1й товар в корзину   //Цена 2го товара
-        int priceSecondProduct = PagesManager.getInstance().getProductCardPage()
-                .clickBuy()
+                .getProduct()           //1й товар в лист
+                .clickBuy()             //Добавляем 1й товар в корзину
                 .typeInSearchFormAndRequest(secondSearch)
                 .clickOnProductContainedName(secondName)
-                .getPrice();
+                .getProduct()          //2й товар в лист
+                .clickBuy();            //Добавляем 2й товар в корзину
 
-        //Добавляем 2й товар в корзину
-        PagesManager.getInstance().getProductCardPage()
-                .clickBuy();
 
+        int priceProduct1 = Product.getList().get(0).getPrice();
+        int priceProduct2 = Product.getList().get(1).getPrice();
         //Проверяем цену иконки корзины
-        Assertions.assertEquals(priceFirstProduct + priceSecondProduct,
-                PagesManager.getInstance().getProductCardPage()
-                        .getBasketIconPrice(),
+        Assertions.assertEquals(priceProduct1 + priceProduct2,
+                PagesManager.getInstance().getHomePage().getBasketIconPrice(),
                 "Цена иконки корзины неверна");
 
-        //Проверяем цену 1го товара в корзине
-        Assertions.assertEquals(priceFirstProduct,
-                PagesManager.getInstance().getProductCardPage()
-                        .clickOnBasketIcon()
-                        .getProductPrice(firstName),
-                "Цена первого товара в козине неверна");
+        String titleProduct1 = Product.getList().get(0).getTitle().substring(0, 10);
+        String titleProduct2 = Product.getList().get(1).getTitle().substring(0, 10);
 
-        //Проверяем цену 2го товара в корзине
-        Assertions.assertEquals(priceSecondProduct,
-                PagesManager.getInstance().getBasketPage()
-                        .getProductPrice(secondName),
-                "Цена второго товара в козине неверна");
+        Assertions.assertAll(
+                //Проверяем цену 1го товара в корзине
+                () -> Assertions.assertEquals(priceProduct1,
+                        PagesManager.getInstance().getProductCardPage()
+                                .clickOnBasketIcon()
+                                .getProductPrice(titleProduct1),
+                        "Цена первого товара в козине неверна"),
 
-        //Проверяем итоговую цену в корзине
-        Assertions.assertEquals(priceFirstProduct + priceSecondProduct,
-                PagesManager.getInstance().getBasketPage()
-//                        .getBasketPrice(),
-                        .getBasketIconPrice(),
-                "Цена корзины неверна");
+                //Проверяем цену 2го товара в корзине
+                () -> Assertions.assertEquals(priceProduct2,
+                        PagesManager.getInstance().getBasketPage()
+                                .getProductPrice(titleProduct2),
+                        "Цена второго товара в козине неверна"),
+
+                //Проверяем итоговую цену в иконки корзине
+                () -> Assertions.assertEquals(priceProduct1 + priceProduct2,
+                        PagesManager.getInstance().getBasketPage()
+                                .getBasketIconPrice(),
+                        "Цена иконки корзины неверна")
+        );
 
         //Проверяем удаление второго товара
         Assertions.assertAll(
@@ -62,33 +63,29 @@ public class AddAndDeleteProductBasketTest extends BeforeTests {
                                 .clickDelete(secondName)
                                 .getProductPrice(secondName),
                         "Товар не удалился из корзины"),
-                () -> Assertions.assertEquals(priceFirstProduct,
+                () -> Assertions.assertEquals(priceProduct1,
                         PagesManager.getInstance().getBasketPage()
                                 .getBasketIconPrice(),
-//                                .getBasketPrice(),
                         "Цена корзины не правильно изменилась после удаления товара"));
 
         //Проверяем добавление первого товара
-        Assertions.assertEquals(priceFirstProduct * 3,
+        Assertions.assertEquals(priceProduct1 * 3,
                 PagesManager.getInstance().getBasketPage()
-                        .clickPlus(firstName)
-                        .clickPlus(firstName)
-//                        .getBasketPrice(),
+                        .clickPlus(titleProduct1)
+                        .clickPlus(titleProduct1)
                         .getBasketIconPrice(),
                 "Цена корзины не равна стоимости 3х товаров");
 
         //Проверяем возвращение второго товара
         Assertions.assertAll(
-                () -> Assertions.assertEquals((priceFirstProduct * 3) + priceSecondProduct,
+                () -> Assertions.assertEquals((priceProduct1 * 3) + priceProduct2,
                         PagesManager.getInstance().getBasketPage()
                                 .restoreProduct()
-//                                .clickCheckBox(secondName)
-//                                .getBasketPrice(),
                                 .getBasketIconPrice(),
                         "Цена корзины не увеличилась на цену возвращенного товара"),
-                () -> Assertions.assertEquals(priceSecondProduct,
+                () -> Assertions.assertEquals(priceProduct2,
                         PagesManager.getInstance().getBasketPage()
-                                .getProductPrice("Detroit"),
+                                .getProductPrice(titleProduct2),
                         "Товар не появился в списке корзины"));
     }
 }

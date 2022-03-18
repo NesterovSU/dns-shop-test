@@ -1,6 +1,7 @@
+package entities;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 
 import java.util.ArrayList;
@@ -11,7 +12,6 @@ import java.util.List;
  */
 
 @Getter
-@Setter
 @AllArgsConstructor
 @ToString
 public class Product {
@@ -19,7 +19,7 @@ public class Product {
             title,
             description,
             article,
-            country;
+            rating;
     private int price;
 
     private static List<Product> productList;
@@ -28,12 +28,16 @@ public class Product {
         productList = new ArrayList<>();
     }
 
-    public static void add(Product product){
+    public static Product add(Product product) {
         productList.add(product);
-        System.out.println(productList);
+        return product;
     }
 
-    public static List<Product>  getList(){
+    public static List<Product> getList() {
         return productList;
+    }
+
+    public static void clearList() {
+        productList.clear();
     }
 }

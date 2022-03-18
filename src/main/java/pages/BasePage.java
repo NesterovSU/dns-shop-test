@@ -73,7 +73,7 @@ public class BasePage {
         return wait.until(ExpectedConditions.visibilityOf(we));
     }
 
-    public void scrollUp(){
+    public void scrollUp() {
         js.executeScript("arguments[0].scrollIntoView()", phone);
     }
 }

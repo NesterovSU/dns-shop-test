@@ -1,9 +1,8 @@
+import entities.Product;
 import managers.DriverManager;
 import managers.PagesManager;
 import managers.PropertiesManager;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
@@ -27,10 +26,6 @@ public class BeforeTests {
         }
         DriverManager.quit();
         PagesManager.deleteInstance();
+        Product.clearList();
     }
-
-//    @BeforeAll
-//    static void afterAll(){
-//        DriverManager.quit();
-//    }
 }
